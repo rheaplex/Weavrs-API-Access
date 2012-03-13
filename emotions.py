@@ -1,4 +1,4 @@
-# keywords.py - Dump a weavr's posts' keywords to file.
+# emotions.py - Dump a weavr's posts' keywords/emotions to file.
 # Copyright (C) 2012  Rob Myers <rob@robmyers.org>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -29,11 +29,12 @@ import weavrs
 # Edge formatting
 ################################################################################
 
-def keyword_graph(runs):
+def emotion_edge_graph(runs):
     """Return a list of node names, and a dict of edge pairs and weights"""
     node_names = set()
     edges = dict()
     for run in runs:
+        emotion = (run['emotion'],)
         for post in run['posts']:
             keywords = set(post['keywords'].split())
             node_names.update(keywords)
@@ -41,11 +42,12 @@ def keyword_graph(runs):
                 for other_keyword in keywords:
                     if other_keyword != keyword:
                         # Make sure a/b and b/a are counted the same
-                        edge = tuple(sorted([keyword, other_keyword]))
+                        # (a,b,label)
+                        edge = tuple(sorted([keyword, other_keyword])) + emotion
                         edges[edge] = edges.get(edge, 0) + 1
     return list(node_names), edges
 
-def keyword_graph_to_xml(stream, nodes, edges):
+def emotion_edge_graph_to_xml(stream, nodes, edges):
     print >>stream, u'<?xml version="1.0" encoding="UTF-8"?>'
     print >>stream, u'<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">'
     print >>stream, u'<graph mode="static" defaultedgetype="undirected">'
@@ -56,8 +58,8 @@ def keyword_graph_to_xml(stream, nodes, edges):
     print >>stream, u'<edges>'
     edge_id = 0
     for edge, weight in edges.iteritems():
-        print >>stream, u'<edge id="%i" source="%s" target="%s" weight="%f" />'\
-            % (edge_id, edge[0], edge[1], weight)
+        print >>stream, u'<edge id="%i" source="%s" target="%s" weight="%f" label="%s" />'\
+            % (edge_id, edge[0], edge[1], weight, edge[2])
         edge_id += 1
     print >>stream, u'</edges>'
     print >>stream, u'</graph>'
@@ -76,8 +78,8 @@ if __name__ == '__main__':
     access_secret = sys.argv[2]
     weavr = weavrs.WeavrApiConnection(config, access_token, access_secret)
     runs, now = weavrs.weavr_runs_all(weavr)
-    nodes, edges = keyword_graph(runs)
-    stream = open("%s-keywords-%s.gexf" %
+    nodes, edges = emotion_edge_graph(runs)
+    stream = open("%s-emotion-edges-%s.gexf" %
                   (urllib.quote(runs[0]['weavr']),
                    now.strftime('%Y-%m-%d-%H-%M-%S')), 'w')
-    keyword_graph_to_xml(stream, nodes, edges)
+    emotion_edge_graph_to_xml(stream, nodes, edges)
