@@ -1,0 +1,20 @@
+Weavrs API Access For Data Visualization
+========================================
+
+Register a prosthetic at www.weavrs.com
+
+Copy config.py.in as config.py and fill it out with your prosthetic's keys.
+
+Run:
+
+	python oauthorize.py
+
+And authorize a weavr. The OAuth keys for this authorization will be printed
+on the command line. Copy these somewhere you won't lose them.
+
+Next run:
+
+     python keywords.py KEY SECRET
+
+This will crate a .gexf file of a graph of the keywords.
+
