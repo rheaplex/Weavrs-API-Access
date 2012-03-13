@@ -46,22 +46,22 @@ def keyword_graph(runs):
     return list(node_names), edges
 
 def keyword_graph_to_xml(stream, nodes, edges):
-    print >>stream, '<?xml version="1.0" encoding="UTF-8"?>'
-    print >>stream, '<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">'
-    print >>stream, '<graph mode="static" defaultedgetype="undirected">'
-    print >>stream, '<nodes>'
+    print >>stream, u'<?xml version="1.0" encoding="UTF-8"?>'
+    print >>stream, u'<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">'
+    print >>stream, u'<graph mode="static" defaultedgetype="undirected">'
+    print >>stream, u'<nodes>'
     for node in nodes:
-        print >> stream, '<node id="%s" label = "%s"/>' % (node, node)
-    print >>stream, '</nodes>'
-    print >>stream, '<edges>'
+        print >> stream, u'<node id="%s" label = "%s"/>' % (node, node)
+    print >>stream, u'</nodes>'
+    print >>stream, u'<edges>'
     edge_id = 0
     for edge, weight in edges.iteritems():
-        print >> stream, '<edge id="%i" source="%s" target="%s" weight="%f" />'\
+        print >>stream, u'<edge id="%i" source="%s" target="%s" weight="%f" />'\
             % (edge_id, edge[0], edge[1], weight)
         edge_id += 1
-    print >>stream, '</edges>'
-    print >>stream, '</graph>'
-    print >>stream, '</gexf>'
+    print >>stream, u'</edges>'
+    print >>stream, u'</graph>'
+    print >>stream, u'</gexf>'
 
 
 ################################################################################
