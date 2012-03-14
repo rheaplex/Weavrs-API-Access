@@ -56,6 +56,7 @@ api_weavr_configuration = 'http://www.weavrs.com/api/1/weavr/configuration/'
 api_weavr_state = 'http://www.weavrs.com/api/1/weavr/state/'
 api_weavr_post = 'http://www.weavrs.com/api/1/weavr/post'
 api_weavr_run = 'http://www.weavrs.com/api/1/weavr/run'
+api_weavr_location = 'http://www.weavrs.com/api/1/weavr/location'
 
 class WeavrApiConnection(object):
     """A class to wrap up an OAuth connection to the Weavrs API"""
@@ -156,6 +157,35 @@ def weavr_runs_all(weavr, configuration = None, max_days=100):
         time.sleep(call_delay_seconds)
     return runs, now
 
+def weavr_locations_between(weavr, start, end):
+    """Get the weavr's locations between the given dates"""
+    args = {'after':format_datetime(start),
+            'before':format_datetime(end),
+            'per_page':1000}
+    response, content = weavr.request(api_weavr_location, args)
+    return content['locations']
+
+def weavr_locations_all(weavr, configuration = None, max_days=100):
+    """Get all the locations since the weavr was created"""
+    created_at_datetime, configuration = weavr_created_at(weavr, configuration)
+    locations = []
+    now = datetime.datetime.now()
+    day = datetime_to_date(created_at_datetime)
+    day_finish = datetime_to_date(now)
+    # Make sure we don't exceed the API limit
+    max_days_delta = datetime.timedelta(max_days)
+    if day_finish - day > max_days_delta:
+        day = day_finish - max_days_delta
+    print "Getting locations from %s to %s" % (day, day_finish)
+    while day <= day_finish:
+        print "Getting locations up to: %s" % day
+        next_day = day + one_day
+        days_locations = weavr_locations_between(weavr, day, next_day)
+        print "(%s locations)" % len(days_locations)
+        locations += days_locations
+        day = next_day
+        time.sleep(call_delay_seconds)
+    return locations, now
 
 
 ################################################################################

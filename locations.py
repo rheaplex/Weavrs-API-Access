@@ -45,5 +45,5 @@ if __name__ == '__main__':
     access_token = sys.argv[1]
     access_secret = sys.argv[2]
     weavr = weavrs.WeavrApiConnection(config, access_token, access_secret)
-    locations, now = weavrs.weavr_locations_all(weavr, None, 1)
+    locations, now = weavrs.weavr_locations_all(weavr)
     dump_locations(locations, now)

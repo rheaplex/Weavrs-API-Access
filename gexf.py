@@ -98,3 +98,23 @@ def keyword_graph_to_xml(stream, nodes, edges):
     print >>stream, u'</edges>'
     print >>stream, u'</graph>'
     print >>stream, u'</gexf>'
+
+
+################################################################################
+# Locations
+################################################################################
+
+def locations_to_xml(stream, locations):
+    print >>stream, u'<?xml version="1.0" encoding="UTF-8" xmlns:viz="http://www.gexf.net/1.1draft/viz"?>'
+    print >>stream, u'<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">'
+    print >>stream, u'<graph mode="static" defaultedgetype="undirected">'
+    print >>stream, u'<nodes>'
+    for location in locations:
+        print >>stream, u'<node id="%s" label = "%s">' % \
+            (location['id'],
+             '%s %s' % (location['title'],location['street_address']).strip())
+        print >>stream, u'<viz:position x="" y="" z="0.0"/>' % ()
+        print >>stream, u'</node>'
+    print >>stream, u'</nodes>'
+    print >>stream, u'</graph>'
+    print >>stream, u'</gexf>'
