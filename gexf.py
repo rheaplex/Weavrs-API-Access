@@ -21,8 +21,25 @@
 
 
 ################################################################################
+# Utilities
+################################################################################
+
+# http://mail.python.org/pipermail/python-list/2004-September/282520.html
+
+def all_pairs(seq):
+    l = len(seq)
+    for i in range(l):
+        for j in range(i+1, l):
+            yield seq[i], seq[j]
+
+
+################################################################################
 # Emotions
 ################################################################################
+
+# Keywords as nodes
+# Emotions as edges
+# Uses number of times keywords occur with the same emotion as edge weight
 
 def emotion_edge_graph(runs):
     """Return a list of node names, and a dict of edge pairs and weights"""
@@ -60,6 +77,44 @@ def emotion_edge_graph_to_xml(stream, nodes, edges):
     print >>stream, u'</graph>'
     print >>stream, u'</gexf>'
 
+# Emotions as nodes
+# Keywords as edges
+# No weight, just show if emotions ever have the same keywords
+# If this isn't any good we could use how iften they have the same keywords
+# Although this might not be very useful
+
+def emotion_node_graph(runs):
+    """Return a list of node names, and a dict of edge pairs and weights"""
+    node_names = set()
+    edges = dict()
+    for run in runs:
+        emotion = [run['emotion']]
+        print emotion
+        node_names.update(emotion)
+        for post in run['posts']:
+            keywords = set(post['keywords'].split())
+            print keywords
+            for keyword in keywords:
+                edges[keyword] = edges.get(keyword, set()).union(emotion)
+    return list(node_names), edges
+
+def emotion_node_graph_to_xml(stream, nodes, edges):
+    print >>stream, u'<?xml version="1.0" encoding="UTF-8"?>'
+    print >>stream, u'<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">'
+    print >>stream, u'<graph mode="static" defaultedgetype="undirected">'
+    print >>stream, u'<nodes>'
+    for node in nodes:
+        print >> stream, u'<node id="%s" label = "%s"/>' % (node, node)
+    print >>stream, u'</nodes>'
+    print >>stream, u'<edges>'
+    edge_id = 0
+    for keyword, emotions in edges.iteritems():
+        for pair in all_pairs(list(emotions)):
+            print >>stream, u'<edge id="%i" source="%s" target="%s" label="%s" />' % (edge_id, pair[0], pair[1], keyword)
+        edge_id += 1
+    print >>stream, u'</edges>'
+    print >>stream, u'</graph>'
+    print >>stream, u'</gexf>'
 
 ################################################################################
 # Keywords
@@ -110,10 +165,12 @@ def locations_to_xml(stream, locations):
     print >>stream, u'<graph mode="static" defaultedgetype="undirected">'
     print >>stream, u'<nodes>'
     for location in locations:
-        print >>stream, u'<node id="%s" label = "%s">' % \
-            (location['id'],
-             '%s %s' % (location['title'],location['street_address']).strip())
-        print >>stream, u'<viz:position x="" y="" z="0.0"/>' % ()
+        name = location['title']
+        if name == '':
+            name = location['street_address']
+        print >>stream, u'<node id="%s" label="%s">' % (location['id'], name)
+        print >>stream, u'<viz:position x="%s" y="%s" z="0.0"/>' % \
+            (location['lon'], location['lat'])
         print >>stream, u'</node>'
     print >>stream, u'</nodes>'
     print >>stream, u'</graph>'

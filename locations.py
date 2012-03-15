@@ -36,7 +36,7 @@ def dump_locations(locations, now):
                          (urllib.quote(locations[0]['weavr']),
                           now.strftime('%Y-%m-%d-%H-%M-%S')),
                          encoding='utf-8', mode='w')
-    gexf.emotion_edge_graph_to_xml(stream, nodes, edges)
+    gexf.locations_to_xml(stream, locations)
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
@@ -45,5 +45,5 @@ if __name__ == '__main__':
     access_token = sys.argv[1]
     access_secret = sys.argv[2]
     weavr = weavrs.WeavrApiConnection(config, access_token, access_secret)
-    locations, now = weavrs.weavr_locations_all(weavr)
+    locations, now = weavrs.weavr_locations_all(weavr, None, 6)
     dump_locations(locations, now)

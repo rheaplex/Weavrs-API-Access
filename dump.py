@@ -31,13 +31,21 @@ import weavrs
 # Tag graph
 ################################################################################
 
-def dump_emotions(runs, now):
+def dump_emotion_edges(runs, now):
     nodes, edges = gexf.emotion_edge_graph(runs)
     stream = codecs.open("%s-emotion-edges-%s.gexf" %
                          (urllib.quote(runs[0]['weavr']),
                           now.strftime('%Y-%m-%d-%H-%M-%S')),
                          encoding='utf-8', mode='w')
     gexf.emotion_edge_graph_to_xml(stream, nodes, edges)
+
+def dump_emotion_nodes(runs, now):
+    nodes, edges = gexf.emotion_node_graph(runs)
+    stream = codecs.open("%s-emotion-nodes-%s.gexf" %
+                         (urllib.quote(runs[0]['weavr']),
+                          now.strftime('%Y-%m-%d-%H-%M-%S')),
+                         encoding='utf-8', mode='w')
+    gexf.emotion_node_graph_to_xml(stream, nodes, edges)
 
 def dump_keywords(runs, now):
     nodes, edges = gexf.keyword_graph(runs)
@@ -55,5 +63,6 @@ if __name__ == '__main__':
     access_secret = sys.argv[2]
     weavr = weavrs.WeavrApiConnection(config, access_token, access_secret)
     runs, now = weavrs.weavr_runs_all(weavr)
-    dump_emotions(runs, now)
+    dump_emotion_edges(runs, now)
+    dump_emotion_nodes(runs, now)
     dump_keywords(runs, now)
