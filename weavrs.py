@@ -47,6 +47,10 @@ def format_datetime(dt):
     """Format the datetime object to a string in Weavrs format"""
     return dt.strftime('%Y-%m-%dT%H:%M:%SZ')
 
+def parse_datetime(text):
+    """Parse the text as a datetime in Weavrs format"""
+    return datetime.datetime.strptime(text, '%Y-%m-%dT%H:%M:%SZ')
+
 
 ################################################################################
 # Weavrs OAuth API Connection
@@ -133,7 +137,7 @@ def weavr_runs_between(weavr, start, end):
             'posts':'true',
             'per_page':1000}
     response, content = weavr.request(api_weavr_run, args)
-    return content['runs']
+    return list(reversed(content['runs']))
 
 def weavr_runs_all(weavr, configuration = None, max_days=100):
     """Get all the runs since the weavr was created"""

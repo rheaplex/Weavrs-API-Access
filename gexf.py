@@ -19,6 +19,9 @@
 # Imports
 ################################################################################
 
+import time
+
+import weavrs
 
 ################################################################################
 # Utilities
@@ -31,6 +34,10 @@ def all_pairs(seq):
     for i in range(l):
         for j in range(i+1, l):
             yield seq[i], seq[j]
+
+def dtepoch(datetime):
+    """Convert the datetime to seconds since epoch"""
+    return time.mktime(datetime.timetuple())
 
 
 ################################################################################
@@ -48,15 +55,11 @@ def emotion_edge_graph(runs):
     for run in runs:
         emotion = (run['emotion'],)
         for post in run['posts']:
-            keywords = set(post['keywords'].split())
+            keywords = list(set(post['keywords'].split()))
             node_names.update(keywords)
-            for keyword in keywords:
-                for other_keyword in keywords:
-                    if other_keyword != keyword:
-                        # Make sure a/b and b/a are counted the same
-                        # (a,b,label)
-                        edge = tuple(sorted([keyword, other_keyword])) + emotion
-                        edges[edge] = edges.get(edge, 0) + 1
+            for pair in all_pairs(keywords):
+                edge = tuple(sorted(pair)) + emotion
+                edges[edge] = edges.get(edge, 0) + 1
     return list(node_names), edges
 
 def emotion_edge_graph_to_xml(stream, nodes, edges):
@@ -65,7 +68,7 @@ def emotion_edge_graph_to_xml(stream, nodes, edges):
     print >>stream, u'<graph mode="static" defaultedgetype="undirected">'
     print >>stream, u'<nodes>'
     for node in nodes:
-        print >> stream, u'<node id="%s" label = "%s"/>' % (node, node)
+        print >> stream, u'<node id="%s" label="%s"/>' % (node, node)
     print >>stream, u'</nodes>'
     print >>stream, u'<edges>'
     edge_id = 0
@@ -89,11 +92,9 @@ def emotion_node_graph(runs):
     edges = dict()
     for run in runs:
         emotion = [run['emotion']]
-        print emotion
         node_names.update(emotion)
         for post in run['posts']:
             keywords = set(post['keywords'].split())
-            print keywords
             for keyword in keywords:
                 edges[keyword] = edges.get(keyword, set()).union(emotion)
     return list(node_names), edges
@@ -104,7 +105,7 @@ def emotion_node_graph_to_xml(stream, nodes, edges):
     print >>stream, u'<graph mode="static" defaultedgetype="undirected">'
     print >>stream, u'<nodes>'
     for node in nodes:
-        print >> stream, u'<node id="%s" label = "%s"/>' % (node, node)
+        print >> stream, u'<node id="%s" label="%s"/>' % (node, node)
     print >>stream, u'</nodes>'
     print >>stream, u'<edges>'
     edge_id = 0
@@ -126,14 +127,12 @@ def keyword_graph(runs):
     edges = dict()
     for run in runs:
         for post in run['posts']:
-            keywords = set(post['keywords'].split())
+            keywords = list(set(post['keywords'].split()))
             node_names.update(keywords)
-            for keyword in keywords:
-                for other_keyword in keywords:
-                    if other_keyword != keyword:
-                        # Make sure a/b and b/a are counted the same
-                        edge = tuple(sorted([keyword, other_keyword]))
-                        edges[edge] = edges.get(edge, 0) + 1
+            for pair in all_pairs(keywords):
+                # Make sure a/b and b/a are counted the same
+                edge = tuple(sorted(pair))
+                edges[edge] = edges.get(edge, 0) + 1
     return list(node_names), edges
 
 def keyword_graph_to_xml(stream, nodes, edges):
@@ -142,13 +141,83 @@ def keyword_graph_to_xml(stream, nodes, edges):
     print >>stream, u'<graph mode="static" defaultedgetype="undirected">'
     print >>stream, u'<nodes>'
     for node in nodes:
-        print >> stream, u'<node id="%s" label = "%s"/>' % (node, node)
+        print >> stream, u'<node id="%s" label="%s"/>' % (node, node)
     print >>stream, u'</nodes>'
     print >>stream, u'<edges>'
     edge_id = 0
     for edge, weight in edges.iteritems():
         print >>stream, u'<edge id="%i" source="%s" target="%s" weight="%f" />'\
             % (edge_id, edge[0], edge[1], weight)
+        edge_id += 1
+    print >>stream, u'</edges>'
+    print >>stream, u'</graph>'
+    print >>stream, u'</gexf>'
+
+
+################################################################################
+# Keywords over time
+################################################################################
+
+def run_keyword_edges(run):
+    """Return a dict of (a,b):n representing the strength of the edges between
+       keywords for the run"""
+    edges = dict()
+    for post in run['posts']:
+            keywords = list(set(post['keywords'].split()))
+            for pair in all_pairs(keywords):
+                # Make sure a/b and b/a are counted the same
+                edge = tuple(sorted(pair))
+                edges[edge] = edges.get(edge, 0) + 1
+    return edges
+
+def runs_keywords(runs):
+    """Get all the keywords for every post of every run"""
+    keywords = set()
+    for run in runs:
+        for post in run['posts']:
+            post_keywords = set(post['keywords'].split())
+            keywords.update(post_keywords)
+    return list(keywords)
+
+class DynamicEdge(object):
+    """An Edge with a start and end time"""
+    
+    def __init__(self, node_from, node_to, time_from, time_to, weight):
+        self.node_from = node_from
+        self.node_to = node_to
+        self.time_from = time_from
+        self.time_to = time_to
+        self.weight = weight
+
+def keyword_edge_durations(runs):
+    """Return a list of dynamic edges for the runs (excluding last run)"""
+    runs_in_time_order = list(reversed(runs))
+    edges = list()
+    current_time = weavrs.parse_datetime(runs_in_time_order[0]['datetime'])
+    current_edges = run_keyword_edges(runs_in_time_order[0])
+    for run in runs_in_time_order[1:]:
+        next_time = weavrs.parse_datetime(run['datetime'])
+        for edge_pair, edge_weight in current_edges.iteritems():
+            edges.append(DynamicEdge(edge_pair[0], edge_pair[1], current_time,
+                                     next_time, edge_weight))
+        current_edges = run_keyword_edges(run)
+        current_time = next_time
+    return edges
+
+def keyword_durations_to_xml(stream, nodes, edges):
+    print >>stream, u'<?xml version="1.0" encoding="UTF-8"?>'
+    print >>stream, u'<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">'
+    print >>stream, u'<graph mode="dynamic" defaultedgetype="undirected">'
+    print >>stream, u'<nodes>'
+    for node in nodes:
+        print >> stream, u'<node id="%s" label="%s"/>' % (node, node)
+    print >>stream, u'</nodes>'
+    print >>stream, u'<edges>'
+    edge_id = 0
+    for edge in edges:
+        print >>stream, u'<edge id="%i" source="%s" target="%s" start="%s" end="%s" weight="%f" />'\
+            % (edge_id, edge.node_from, edge.node_to, dtepoch(edge.time_from),
+               dtepoch(edge.time_to), edge.weight)
         edge_id += 1
     print >>stream, u'</edges>'
     print >>stream, u'</graph>'
