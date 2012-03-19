@@ -39,6 +39,10 @@ def dtepoch(datetime):
     """Convert the datetime to seconds since epoch"""
     return time.mktime(datetime.timetuple())
 
+def dtxsd(dt):
+    """Convert the datetime to an xsd:datetime string"""
+    return dt.strftime("%Y-%m-%dT%H:%M:%s")
+
 
 ################################################################################
 # Emotions
@@ -207,7 +211,8 @@ def keyword_edge_durations(runs):
 def keyword_durations_to_xml(stream, nodes, edges):
     print >>stream, u'<?xml version="1.0" encoding="UTF-8"?>'
     print >>stream, u'<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">'
-    print >>stream, u'<graph mode="dynamic" defaultedgetype="undirected">'
+    # xsd:dateTime for timeformat
+    print >>stream, u'<graph mode="dynamic" defaultedgetype="undirected" timeformat="datetime">'
     print >>stream, u'<nodes>'
     for node in nodes:
         print >> stream, u'<node id="%s" label="%s"/>' % (node, node)
@@ -216,8 +221,8 @@ def keyword_durations_to_xml(stream, nodes, edges):
     edge_id = 0
     for edge in edges:
         print >>stream, u'<edge id="%i" source="%s" target="%s" start="%s" end="%s" weight="%f" />'\
-            % (edge_id, edge.node_from, edge.node_to, dtepoch(edge.time_from),
-               dtepoch(edge.time_to), edge.weight)
+            % (edge_id, edge.node_from, edge.node_to, dtxsd(edge.time_from),
+               dtxsd(edge.time_to), edge.weight)
         edge_id += 1
     print >>stream, u'</edges>'
     print >>stream, u'</graph>'
