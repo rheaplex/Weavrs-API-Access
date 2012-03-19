@@ -71,7 +71,7 @@ if __name__ == '__main__':
     access_token = sys.argv[1]
     access_secret = sys.argv[2]
     weavr = weavrs.WeavrApiConnection(config, access_token, access_secret)
-    runs, now = weavrs.weavr_runs_all(weavr, None, 2)
+    runs, now = weavrs.weavr_runs_all(weavr)
     dump_emotion_edges(runs, now)
     dump_emotion_nodes(runs, now)
     dump_keywords(runs, now)
