@@ -19,6 +19,7 @@
 # Imports
 ################################################################################
 
+import cgi
 import time
 
 import weavrs
@@ -72,7 +73,7 @@ def emotion_edge_graph_to_xml(stream, nodes, edges):
     print >>stream, u'<graph mode="static" defaultedgetype="undirected">'
     print >>stream, u'<nodes>'
     for node in nodes:
-        print >> stream, u'<node id="%s" label="%s"/>' % (node, node)
+        print >> stream, u'<node id="%s" label="%s" />' % (node, node)
     print >>stream, u'</nodes>'
     print >>stream, u'<edges>'
     edge_id = 0
@@ -109,7 +110,7 @@ def emotion_node_graph_to_xml(stream, nodes, edges):
     print >>stream, u'<graph mode="static" defaultedgetype="undirected">'
     print >>stream, u'<nodes>'
     for node in nodes:
-        print >> stream, u'<node id="%s" label="%s"/>' % (node, node)
+        print >> stream, u'<node id="%s" label="%s" />' % (node, node)
     print >>stream, u'</nodes>'
     print >>stream, u'<edges>'
     edge_id = 0
@@ -145,7 +146,7 @@ def keyword_graph_to_xml(stream, nodes, edges):
     print >>stream, u'<graph mode="static" defaultedgetype="undirected">'
     print >>stream, u'<nodes>'
     for node in nodes:
-        print >> stream, u'<node id="%s" label="%s"/>' % (node, node)
+        print >> stream, u'<node id="%s" label="%s" />' % (node, node)
     print >>stream, u'</nodes>'
     print >>stream, u'<edges>'
     edge_id = 0
@@ -215,7 +216,7 @@ def keyword_durations_to_xml(stream, nodes, edges):
     print >>stream, u'<graph mode="dynamic" defaultedgetype="undirected" timeformat="datetime">'
     print >>stream, u'<nodes>'
     for node in nodes:
-        print >> stream, u'<node id="%s" label="%s"/>' % (node, node)
+        print >> stream, u'<node id="%s" label="%s" />' % (node, node)
     print >>stream, u'</nodes>'
     print >>stream, u'<edges>'
     edge_id = 0
@@ -242,8 +243,9 @@ def locations_to_xml(stream, locations):
         name = location['title']
         if name == '':
             name = location['street_address']
-        print >>stream, u'<node id="%s" label="%s">' % (location['id'], name)
-        print >>stream, u'<viz:position x="%s" y="%s" z="0.0"/>' % \
+        print >>stream, u'<node id="%s" label="%s">' % (location['id'],
+                                                        cgi.escape(name))
+        print >>stream, u'<viz:position x="%s" y="%s" z="0.0" />' % \
             (location['lon'], location['lat'])
         print >>stream, u'</node>'
     print >>stream, u'</nodes>'
