@@ -234,8 +234,8 @@ def keyword_durations_to_xml(stream, nodes, edges):
 ################################################################################
 
 def locations_to_xml(stream, locations):
-    print >>stream, u'<?xml version="1.0" encoding="UTF-8" xmlns:viz="http://www.gexf.net/1.1draft/viz"?>'
-    print >>stream, u'<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">'
+    print >>stream, u'<?xml version="1.0" encoding="UTF-8"?>'
+    print >>stream, u'<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2" xmlns:viz="http://www.gexf.net/1.1draft/viz">'
     print >>stream, u'<graph mode="static" defaultedgetype="undirected">'
     print >>stream, u'<nodes>'
     for location in locations:
