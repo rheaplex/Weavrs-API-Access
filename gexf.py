@@ -238,6 +238,10 @@ def locations_to_xml(stream, locations):
     print >>stream, u'<?xml version="1.0" encoding="UTF-8"?>'
     print >>stream, u'<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2" xmlns:viz="http://www.gexf.net/1.1draft/viz">'
     print >>stream, u'<graph mode="static" defaultedgetype="undirected">'
+    print >>stream, u'<attributes class="node" mode="static">'
+    print >>stream, u'<attribute id="latitude" title="latitude" type="double"/>'
+    print >>stream, u'<attribute id="longitude" title="longitude" type="double"/>'
+    print >>stream, u'</attributes>'
     print >>stream, u'<nodes>'
     for location in locations:
         name = location['title']
@@ -245,8 +249,12 @@ def locations_to_xml(stream, locations):
             name = location['street_address']
         print >>stream, u'<node id="%s" label="%s">' % (location['id'],
                                                         cgi.escape(name))
-        print >>stream, u'<viz:position x="%s" y="%s" z="0.0" />' % \
-            (location['lon'], location['lat'])
+        print >>stream, u'<attvalue for="latitude" value="%s" />' % \
+            location['lat']
+        print >>stream, u'<attvalue for="longitude" value="%s" />' % \
+            location['lon']
+        #print >>stream, u'<viz:position x="%s" y="%s" z="0.0" />' % \
+        #    (location['lon'], location['lat'])
         print >>stream, u'</node>'
     print >>stream, u'</nodes>'
     print >>stream, u'</graph>'
