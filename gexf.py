@@ -42,7 +42,7 @@ def dtepoch(datetime):
 
 def dtxsd(dt):
     """Convert the datetime to an xsd:datetime string"""
-    return dt.strftime("%Y-%m-%dT%H:%M:%s")
+    return dt.strftime("%Y-%m-%dT%H:%M:%S")
 
 
 ################################################################################
@@ -239,8 +239,8 @@ def locations_to_xml(stream, locations):
     print >>stream, u'<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2" xmlns:viz="http://www.gexf.net/1.1draft/viz">'
     print >>stream, u'<graph mode="static" defaultedgetype="undirected">'
     print >>stream, u'<attributes class="node" mode="static">'
-    print >>stream, u'<attribute id="latitude" title="latitude" type="double"/>'
-    print >>stream, u'<attribute id="longitude" title="longitude" type="double"/>'
+    print >>stream, u'<attribute id="latitude" title="latitude" type="double" />'
+    print >>stream, u'<attribute id="longitude" title="longitude" type="double" />'
     print >>stream, u'</attributes>'
     print >>stream, u'<nodes>'
     for location in locations:
