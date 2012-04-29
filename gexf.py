@@ -42,7 +42,7 @@ def dtepoch(datetime):
 
 def dtxsd(dt):
     """Convert the datetime to an xsd:datetime string"""
-    return dt.strftime.isoformat()
+    return dt.isoformat()
 
 
 ################################################################################
