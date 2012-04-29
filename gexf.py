@@ -184,6 +184,22 @@ def runs_keywords(runs):
             keywords.update(post_keywords)
     return list(keywords)
 
+def keyword_first_run(runs, keyword):
+    """Get the run a keyword first appears in"""
+    first_appearance = None
+    for run in runs:
+        for post in run['posts']:
+            if keyword in set(post['keywords'].split()):
+                first_appearance = run
+                break
+    return first_appearance
+
+def keywords_first_run_times(runs, keywords):
+    first_appearances = []
+    for keyword in keywords:
+        first_appearances.append(keyword_first_run(runs, keyword)["datetime"])
+    return first_appearances
+
 class DynamicEdge(object):
     """An Edge with a start and end time"""
     
@@ -208,14 +224,19 @@ def keyword_edge_durations(runs):
         current_time = next_time
     return edges
 
-def keyword_durations_to_xml(stream, nodes, edges):
+def keyword_durations_to_xml(stream, nodes, edges, edge_start_times=False):
     print >>stream, u'<?xml version="1.0" encoding="UTF-8"?>'
     print >>stream, u'<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">'
     # xsd:dateTime for timeformat
     print >>stream, u'<graph mode="dynamic" defaultedgetype="undirected" timeformat="datetime">'
     print >>stream, u'<nodes>'
-    for node in nodes:
-        print >> stream, u'<node id="%s" label="%s" />' % (node, node)
+    if edge_start_times:
+        for i in xrange(len(nodes)):
+            print >> stream, u'<node id="%s" label="%s" from="%s"/>' % \
+                (nodes[i], nodes[i], edge_start_times[i])
+    else:
+        for node in nodes:
+            print >> stream, u'<node id="%s" label="%s" />' % (node, node)
     print >>stream, u'</nodes>'
     print >>stream, u'<edges>'
     edge_id = 0

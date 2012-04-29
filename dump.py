@@ -55,14 +55,24 @@ def dump_keywords(runs, now):
                          encoding='utf-8', mode='w')
     gexf.keyword_graph_to_xml(stream, nodes, edges)
 
-def dump_keywords_dynamic(runs, now):
+def dump_keywords_dynamic_edges(runs, now):
     nodes = gexf.runs_keywords(runs)
     edges = gexf.keyword_edge_durations(runs)
-    stream = codecs.open("%s-keywords-dynamic-%s.gexf" %
+    stream = codecs.open("%s-keywords-dynamic-edges-%s.gexf" %
                   (urllib.quote(runs[0]['weavr']),
                    now.strftime('%Y-%m-%d-%H-%M-%S')),
                          encoding='utf-8', mode='w')
     gexf.keyword_durations_to_xml(stream, nodes, edges)
+
+def dump_keywords_dynamic_nodes_and_edges(runs, now):
+    nodes = gexf.runs_keywords(runs)
+    edges = gexf.keyword_edge_durations(runs)
+    node_start_times = gexf.keywords_first_run_times(runs, nodes)
+    stream = codecs.open("%s-keywords-dynamic-nodes-and-edges-%s.gexf" %
+                  (urllib.quote(runs[0]['weavr']),
+                   now.strftime('%Y-%m-%d-%H-%M-%S')),
+                         encoding='utf-8', mode='w')
+    gexf.keyword_durations_to_xml(stream, nodes, edges, node_start_times)
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
@@ -71,8 +81,9 @@ if __name__ == '__main__':
     access_token = sys.argv[1]
     access_secret = sys.argv[2]
     weavr = weavrs.WeavrApiConnection(config, access_token, access_secret)
-    runs, now = weavrs.weavr_runs_all(weavr)
+    runs, now = weavrs.weavr_runs_all(weavr) 
     dump_emotion_edges(runs, now)
     dump_emotion_nodes(runs, now)
     dump_keywords(runs, now)
-    dump_keywords_dynamic(runs, now)
+    dump_keywords_dynamic_edges(runs, now)
+    dump_keywords_dynamic_nodes_and_edges(runs, now)
