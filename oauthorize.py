@@ -54,11 +54,13 @@ CALLBACK_URL = 'http://127.0.0.1:8080/'
 
 
 ################################################################################
-# A horrible, horrible global
+# Horrible, horrible globals
 # Replace with something sane if this needs to be made more than a script
 ################################################################################
 
 secret = None
+
+serve = True
 
 
 ################################################################################
@@ -68,6 +70,7 @@ secret = None
 class RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def do_GET(self):
+        global serve
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.end_headers()
@@ -88,7 +91,7 @@ class RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         print "Access Token:"
         print "  oauth_token        = %s" % access_token['oauth_token']
         print "  oauth_token_secret = %s" % access_token['oauth_token_secret']
-        sys.exit(0)
+        serve = False
 
 ################################################################################
 # Main Flow Of Execution
@@ -122,4 +125,5 @@ except:
 # Run a local web server to receive the authentication results from the browser
 
 httpd = BaseHTTPServer.HTTPServer(('127.0.0.1', 8080), RequestHandler)
-httpd.serve_forever()
+while serve:
+    httpd.handle_request()
