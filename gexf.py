@@ -42,7 +42,7 @@ def dtepoch(datetime):
 
 def dtxsd(dt):
     """Convert the datetime to an xsd:datetime string"""
-    return dt.strftime("%Y-%m-%dT%H:%M:%S")
+    return dt.strftime.isoformat()
 
 
 ################################################################################
@@ -196,11 +196,10 @@ class DynamicEdge(object):
 
 def keyword_edge_durations(runs):
     """Return a list of dynamic edges for the runs (excluding last run)"""
-    runs_in_time_order = list(reversed(runs))
     edges = list()
-    current_time = weavrs.parse_datetime(runs_in_time_order[0]['datetime'])
-    current_edges = run_keyword_edges(runs_in_time_order[0])
-    for run in runs_in_time_order[1:]:
+    current_time = weavrs.parse_datetime(runs[0]['datetime'])
+    current_edges = run_keyword_edges(runs[0])
+    for run in runs[1:]:
         next_time = weavrs.parse_datetime(run['datetime'])
         for edge_pair, edge_weight in current_edges.iteritems():
             edges.append(DynamicEdge(edge_pair[0], edge_pair[1], current_time,
